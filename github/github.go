@@ -22,9 +22,17 @@ import (
 	"github.com/google/go-querystring/query"
 )
 
+type HttpClient interface {
+	Do(req *http.Request) (resp *http.Response, err error)
+	Get(url string) (resp *http.Response, err error)
+	Head(url string) (resp *http.Response, err error)
+	Post(url string, bodyType string, body io.Reader) (resp *http.Response, err error)
+	PostForm(url string, data url.Values) (resp *http.Response, err error)
+}
+
 const (
 	libraryVersion = "0.1"
-	defaultBaseURL = "https://api.github.com/"
+	defaultBaseURL = "https://git.teltech.co/api/v3/"
 	uploadBaseURL  = "https://uploads.github.com/"
 	userAgent      = "go-github/" + libraryVersion
 
@@ -44,7 +52,7 @@ const (
 // A Client manages communication with the GitHub API.
 type Client struct {
 	// HTTP client used to communicate with the API.
-	client *http.Client
+	client HttpClient
 
 	// Base URL for API requests.  Defaults to the public GitHub API, but can be
 	// set to a domain endpoint to use with GitHub Enterprise.  BaseURL should
@@ -118,12 +126,14 @@ func addOptions(s string, opt interface{}) (string, error) {
 // provided, http.DefaultClient will be used.  To use API methods which require
 // authentication, provide an http.Client that will perform the authentication
 // for you (such as that provided by the golang.org/x/oauth2 library).
-func NewClient(httpClient *http.Client) *Client {
+func NewClient(httpClient HttpClient) *Client {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
 	baseURL, _ := url.Parse(defaultBaseURL)
 	uploadURL, _ := url.Parse(uploadBaseURL)
+
+	fmt.Println(baseURL)
 
 	c := &Client{client: httpClient, BaseURL: baseURL, UserAgent: userAgent, UploadURL: uploadURL}
 	c.Activity = &ActivityService{client: c}

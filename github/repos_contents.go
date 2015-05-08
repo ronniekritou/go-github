@@ -14,8 +14,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
-	"net/url"
 	"path"
 )
 
@@ -224,25 +222,27 @@ const (
 // or github.Zipball constant.
 //
 // GitHub API docs: http://developer.github.com/v3/repos/contents/#get-archive-link
-func (s *RepositoriesService) GetArchiveLink(owner, repo string, archiveformat archiveFormat, opt *RepositoryContentGetOptions) (*url.URL, *Response, error) {
-	u := fmt.Sprintf("repos/%s/%s/%s", owner, repo, archiveformat)
-	if opt != nil && opt.Ref != "" {
-		u += fmt.Sprintf("/%s", opt.Ref)
-	}
-	req, err := s.client.NewRequest("GET", u, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-	var resp *http.Response
-	// Use http.DefaultTransport if no custom Transport is configured
-	if s.client.client.Transport == nil {
-		resp, err = http.DefaultTransport.RoundTrip(req)
-	} else {
-		resp, err = s.client.client.Transport.RoundTrip(req)
-	}
-	if err != nil || resp.StatusCode != http.StatusFound {
-		return nil, newResponse(resp), err
-	}
-	parsedURL, err := url.Parse(resp.Header.Get("Location"))
-	return parsedURL, newResponse(resp), err
-}
+// func (s *RepositoriesService) GetArchiveLink(owner, repo string, archiveformat archiveFormat, opt *RepositoryContentGetOptions) (*url.URL, *Response, error) {
+// 	u := fmt.Sprintf("repos/%s/%s/%s", owner, repo, archiveformat)
+// 	if opt != nil && opt.Ref != "" {
+// 		u += fmt.Sprintf("/%s", opt.Ref)
+// 	}
+// 	req, err := s.client.NewRequest("GET", u, nil)
+// 	if err != nil {
+// 		return nil, nil, err
+// 	}
+// 	var resp *http.Response
+// 	// Use http.DefaultTransport if no custom Transport is configured
+// 	// if client, ok := s.client.client.(*http.Client); ok {
+// 	// 	if s.client.client.Transport == nil {
+// 	// 		resp, err = http.DefaultTransport.RoundTrip(req)
+// 	// 	} else {
+// 	resp, err = s.client.client.Transport.RoundTrip(req)
+// 	// 	}
+// 	// }
+// 	if err != nil || resp.StatusCode != http.StatusFound {
+// 		return nil, newResponse(resp), err
+// 	}
+// 	parsedURL, err := url.Parse(resp.Header.Get("Location"))
+// 	return parsedURL, newResponse(resp), err
+// }
